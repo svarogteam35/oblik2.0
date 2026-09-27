@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS PortalAccess(UserId integer PRIMARY KEY REFERENCES AppUsers(id) ON DELETE CASCADE,Enabled boolean NOT NULL DEFAULT false,InviteHash text,InviteExpires timestamptz);
+CREATE TABLE IF NOT EXISTS PortalMfa(UserId integer PRIMARY KEY REFERENCES AppUsers(id) ON DELETE CASCADE,Secret text NOT NULL,LastStep bigint NOT NULL DEFAULT -1);
+CREATE TABLE IF NOT EXISTS PortalChallenges(TokenHash text PRIMARY KEY,UserId integer NOT NULL REFERENCES AppUsers(id) ON DELETE CASCADE,Secret text NOT NULL,PasswordHash text NOT NULL,Expires timestamptz NOT NULL);
+CREATE TABLE IF NOT EXISTS PortalSessions(TokenHash text PRIMARY KEY,UserId integer NOT NULL REFERENCES AppUsers(id) ON DELETE CASCADE,PasswordHash text NOT NULL,Created timestamptz NOT NULL DEFAULT now(),LastSeen timestamptz NOT NULL DEFAULT now(),Expires timestamptz NOT NULL);
+CREATE TABLE IF NOT EXISTS PortalAttempts(IdentityHash text PRIMARY KEY,Failures integer NOT NULL DEFAULT 0,WindowStart timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS PortalAudit(Id bigserial PRIMARY KEY,OccurredAt timestamptz NOT NULL DEFAULT now(),Actor text NOT NULL,Event text NOT NULL,Success boolean NOT NULL,Ip text NOT NULL,UserAgent text NOT NULL,OrganizationId integer,WarehouseId integer,ResultCount integer,Details text NOT NULL DEFAULT '');
+CREATE INDEX IF NOT EXISTS ix_portal_audit_time ON PortalAudit(OccurredAt);
